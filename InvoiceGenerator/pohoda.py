@@ -2,7 +2,11 @@
 import datetime
 import logging
 import xml.etree.cElementTree as ET
-from builtins import str
+
+from .pdf import BaseInvoice
+
+logger = logging.getLogger(__name__)
+
 
 from .pdf import BaseInvoice
 
@@ -13,11 +17,11 @@ __all__ = ['SimpleInvoice']
 
 class SimpleInvoice(BaseInvoice):
     """
-    Generator of simple invoice in XML format for Pohoda accounting system
+    Generator of a simple invoice in XML format for the Pohoda accounting system.
 
-    :param invoice: the invoice
+    :param invoice: The invoice.
     :type invoice: Invoice
-    :param tax_rates: definition of tax rates used in Pohoda, left None for default values
+    :param tax_rates: Definition of tax rates used in Pohoda. Leave None for default values.
     :type tax_rates: dict
     """
 
@@ -36,7 +40,6 @@ class SimpleInvoice(BaseInvoice):
         if tax_rates:
             self.tax_rates = tax_rates
         self.inv_tax_rates = {v: k for k, v in self.tax_rates.items()}
-
     def _add_item(self, xml_invoice, item):
         invoice_item = ET.SubElement(xml_invoice, "{%s}invoiceItem" % self._inv_ns)
 

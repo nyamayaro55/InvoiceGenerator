@@ -1,38 +1,43 @@
-# -*- coding: utf-8 -*-
 import os
 import sys
+import locale
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(os.path.join(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-LANGUAGE = 'cs'
-
+# Default language
+LANGUAGE = 'en'
 
 def get_gettext(lang):
     import gettext
     path = os.path.join(PROJECT_ROOT, 'locale')
-    t = gettext.translation(
-        'messages',
-        path,
-        languages=[lang],
-        codeset='utf8',
-        fallback=True,
-    )
-    t.install()
+    try:
+        t = gettext.translation(
+            'messages',
+            path,
+            languages=[lang],
+            fallback=True,
+        )
+        t.install()
 
-    if sys.version_info >= (3, 0):
-        return lambda message: t.gettext(message)
-    else:
-        return lambda message: t.ugettext(message)
+        if sys.version_info >= (3, 0):
+            return lambda message: t.gettext(message)
+        else:
+            return lambda message: t.ugettext(message)
+    except IOError:
+        print("Fix this!")
+        return lambda x: x
 
+# Function to get OS language
+def get_os_language():
+    return locale.getdefaultlocale()[0]
 
 try:
-    lang = os.environ.get("INVOICE_LANG", LANGUAGE)
+    # Get language from OS settings
+    lang = os.environ.get("INVOICE_LANG", get_os_language() or LANGUAGE)
     _ = get_gettext(lang)
-except IOError:
-    def _(x): x
+except OSError:
     print("Fix this!")
-except ImportError:
-    def _(x): x
+    _ = lambda x: x
 
 FONT_PATH = os.path.join(PROJECT_ROOT, "fonts", "DejaVuSans.ttf")
 FONT_BOLD_PATH = os.path.join(PROJECT_ROOT, "fonts", "DejaVuSans-Bold.ttf")
@@ -42,4 +47,4 @@ if not os.path.isfile(FONT_PATH):
     FONT_BOLD_PATH = "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf"
 
 if not os.path.isfile(FONT_PATH):
-    raise Exception("Fonts not found")
+    raise FileNotFoundError("Fonts not found")
